@@ -1,0 +1,6 @@
+# Ignore sensitive environment variables
+backend/.env
+
+# Ignore any system files
+.DS_Store
+Thumbs.db

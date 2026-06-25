@@ -1,0 +1,220 @@
+/* ─── PAGE HEADER ───────────────────────────────────────── */
+.page-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: var(--white);
+    text-align: center;
+    padding: 120px 20px 60px;
+}
+
+.page-header h1 {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.page-header p {
+    font-size: 16px;
+    color: #ccc;
+}
+
+/* ─── SHOP SECTION ──────────────────────────────────────── */
+.shop-section {
+    padding: 60px 0;
+}
+
+.shop-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 40px;
+}
+
+/* ─── SIDEBAR ───────────────────────────────────────────── */
+.sidebar {
+    position: sticky;
+    top: 90px;
+    height: fit-content;
+}
+
+.filter-section {
+    background-color: var(--white);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.filter-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--primary);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+}
+
+.filter-list li {
+    margin-bottom: 8px;
+}
+
+.filter-link {
+    font-size: 14px;
+    color: var(--gray);
+    transition: var(--transition);
+    display: block;
+    padding: 5px 0;
+}
+
+.filter-link:hover,
+.filter-link.active {
+    color: var(--accent);
+    padding-left: 5px;
+}
+
+.filter-link.active {
+    font-weight: 600;
+}
+
+/* ─── PRICE RANGE ───────────────────────────────────────── */
+.price-range input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    margin-bottom: 10px;
+}
+
+.price-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--gray);
+}
+
+/* ─── SORT SELECT ───────────────────────────────────────── */
+.sort-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--primary);
+    outline: none;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+}
+
+.sort-select:focus {
+    border-color: var(--accent);
+}
+
+/* ─── PRODUCTS TOOLBAR ──────────────────────────────────── */
+.products-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.products-toolbar p {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+.view-toggle {
+    display: flex;
+    gap: 10px;
+}
+
+.view-btn {
+    width: 35px;
+    height: 35px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: none;
+    cursor: pointer;
+    color: var(--gray);
+    transition: var(--transition);
+}
+
+.view-btn.active,
+.view-btn:hover {
+    background-color: var(--accent);
+    color: var(--white);
+    border-color: var(--accent);
+}
+
+/* ─── PRODUCTS GRID ─────────────────────────────────────── */
+.products-area .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+/* ─── LIST VIEW ─────────────────────────────────────────── */
+.products-area .products-grid.list-view {
+    grid-template-columns: 1fr;
+}
+
+.products-area .products-grid.list-view .product-card {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    align-items: center;
+}
+
+.products-area .products-grid.list-view .product-card img {
+    height: 150px;
+}
+
+/* ─── NO PRODUCTS ───────────────────────────────────────── */
+.no-products {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray);
+    grid-column: 1 / -1;
+}
+
+.no-products i {
+    font-size: 60px;
+    margin-bottom: 20px;
+    color: var(--border);
+}
+
+.no-products h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .products-area .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .shop-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+    }
+
+    .products-area .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .products-area .products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ─── FIX PRODUCT CARD IMAGES ───────────────────────────── */
+.products-area .product-card img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    object-position: center center;
+}

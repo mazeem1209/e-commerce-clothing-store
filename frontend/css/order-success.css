@@ -1,0 +1,171 @@
+/* ─── SUCCESS SECTION ───────────────────────────────────── */
+.success-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 60px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+.success-box {
+    background-color: var(--white);
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+/* ─── SUCCESS ICON ──────────────────────────────────────── */
+.success-icon {
+    width: 100px;
+    height: 100px;
+    background-color: #eafaf1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    animation: scaleIn 0.5s ease;
+}
+
+.success-icon i {
+    font-size: 50px;
+    color: #2ecc71;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ─── SUCCESS TEXT ──────────────────────────────────────── */
+.success-box h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 15px;
+}
+
+.success-box p {
+    font-size: 15px;
+    color: var(--gray);
+    line-height: 1.8;
+    margin-bottom: 25px;
+}
+
+/* ─── ORDER ID BOX ──────────────────────────────────────── */
+.order-id-box {
+    background-color: var(--light);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 35px;
+}
+
+.order-id-box p {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 5px;
+}
+
+.order-id-box h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+/* ─── SUCCESS STEPS ─────────────────────────────────────── */
+.success-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 35px;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.step i {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: var(--border);
+    color: var(--gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+.step p {
+    font-size: 12px;
+    color: var(--gray);
+    margin: 0;
+}
+
+.step.active i {
+    background-color: #2ecc71;
+    color: var(--white);
+}
+
+.step.active p {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.step-line {
+    width: 60px;
+    height: 2px;
+    background-color: var(--border);
+    margin-bottom: 20px;
+}
+
+/* ─── SUCCESS ACTIONS ───────────────────────────────────── */
+.success-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.success-actions .btn {
+    min-width: 180px;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .success-box {
+        padding: 40px 20px;
+    }
+
+    .success-box h1 {
+        font-size: 22px;
+    }
+
+    .step-line {
+        width: 30px;
+    }
+
+    .success-actions {
+        flex-direction: column;
+    }
+
+    .success-actions .btn {
+        width: 100%;
+    }
+}
