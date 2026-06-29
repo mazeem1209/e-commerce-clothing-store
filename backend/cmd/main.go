@@ -18,6 +18,8 @@ func corsMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		
+		// If it's a preflight OPTIONS request, answer immediately and stop processing
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
@@ -32,7 +34,7 @@ func main() {
 
 	router := mux.NewRouter()
 
-	// Apply CORS first
+	// Apply CORS middleware globally to catch all incoming routing steps
 	router.Use(corsMiddleware)
 
 	api := router.PathPrefix("/api").Subrouter()
@@ -56,6 +58,7 @@ func main() {
 	protected.HandleFunc("/cart/{id}", handlers.RemoveFromCart).Methods("DELETE", "OPTIONS")
 	protected.HandleFunc("/orders/{user_id}", handlers.GetOrders).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/orders/{id}", handlers.GetOrder).Methods("GET", "OPTIONS")
+	protected.HandleFunc("/orders/{id}/cancel", handlers.CancelOrder).Methods("PUT", "OPTIONS")
 	protected.HandleFunc("/checkout", handlers.Checkout).Methods("POST", "OPTIONS")
 	protected.HandleFunc("/returns", handlers.RequestReturn).Methods("POST", "OPTIONS")
 	protected.HandleFunc("/returns/{user_id}", handlers.GetUserReturns).Methods("GET", "OPTIONS")
@@ -80,7 +83,7 @@ func main() {
 
 	port := cfg.ServerPort
 	if port != "" && port[0] != ':' {
-    	port = ":" + port
+		port = ":" + port
 	}
 
 	fmt.Println("Server starting on port", cfg.ServerPort)

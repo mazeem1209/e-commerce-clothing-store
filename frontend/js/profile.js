@@ -72,7 +72,14 @@ function createOrderCard(order) {
             <p>Status: <span>${order.status}</span></p>
         </div>
         <div class="order-card-actions" style="margin-top:15px;">
-            ${order.status !== 'cancelled' ? `
+            ${order.status === 'pending' || order.status === 'processing' ? `
+            <button class="btn btn-primary" 
+                style="padding:8px 20px;font-size:13px;"
+                onclick="cancelOrder(${order.id})">
+                <i class="fas fa-undo"></i> Cancel Order
+            </button>` : ''}
+
+            ${order.status === 'shipped' || order.status === 'delivered' ? `
             <button class="btn btn-primary" 
                 style="padding:8px 20px;font-size:13px;"
                 onclick="requestReturn(${order.id})">
@@ -145,6 +152,53 @@ async function requestReturn(orderId) {
     } catch (error) {
         showNotification('Server error. Please try again!', 'error');
         console.error('Return error:', error);
+    }
+}
+
+async function cancelOrder(orderId) {
+    // 1. Double check with the user before destroying data
+    if (!confirm("Are you sure you want to cancel this order?")) {
+        return; 
+    }
+
+    try {
+        // 2. Fire the network request to your backend endpoint
+        const response = await fetchWithAuth(`${API_URL}/orders/${orderId}/cancel`, {
+            method: 'PUT', // or 'PATCH' depending on your API design
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: 'cancelled' })
+        });
+
+        // 3. Handle the server's response
+        if (response.ok) {
+            // Display the beautiful green toast notification
+            showNotification("Order cancelled successfully!", "success"); 
+            
+            // Wait 1.5 seconds so the user can actually read the notification 
+            // before the page updates or reloads!
+            setTimeout(() => {
+                if (typeof loadDashboardStats === 'function') {
+                    loadDashboardStats(); 
+                } else {
+                    location.reload(); 
+                }
+            }, 1500);
+        } else {
+            // ─── UPDATE THIS BLOCK FOR THE RED ERROR MESSAGE ───
+            // Try to extract the error message from the backend JSON, fallback to generic text
+            try {
+                const errorData = await response.json();
+                showNotification(errorData.message || "Failed to cancel order.", "error");
+            } catch (e) {
+                showNotification("An error occurred while processing your request.", "error");
+            }
+        }
+
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        alert("An error occurred while trying to cancel the order.");
     }
 }
 
