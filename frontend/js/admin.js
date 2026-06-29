@@ -31,7 +31,9 @@ async function loadDashboardStats() {
 
             // Calculate revenue
             if (orders && orders.length > 0) {
-                const revenue = orders.reduce((sum, order) => sum + order.total_amount, 0);
+                const completedOrders = orders.filter(order => order.status === 'delivered');
+                const revenue = completedOrders.reduce((sum, order) => sum + order.total_amount, 0);
+                // const revenue = orders.reduce((sum, order) => sum + order.total_amount, 0);
                 document.getElementById('total-revenue').textContent = `$${revenue.toFixed(2)}`;
 
                 // Load recent orders
