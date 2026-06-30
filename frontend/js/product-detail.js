@@ -122,10 +122,23 @@ function changeQuantity(change) {
 // ─── ADD PRODUCT TO CART ──────────────────────────────────
 function addProductToCart(product) {
     const quantity = parseInt(document.getElementById('detail-quantity').textContent);
-    const productWithQuantity = { ...product, quantity };
 
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     const existingItem = cart.find(item => item.id === product.id);
+    const currentQtyInCart = existingItem ? existingItem.quantity : 0;
+    const totalRequested = currentQtyInCart + quantity;
+
+    if (product.stock <= 0) {
+        showNotification(`${product.name} is out of stock`, 'error');
+        return;
+    }
+
+    if (totalRequested > product.stock) {
+        showNotification(`Only ${product.stock} of ${product.name} available`, 'error');
+        return;
+    }
+
+    const productWithQuantity = { ...product, quantity };
 
     if (existingItem) {
         existingItem.quantity += quantity;

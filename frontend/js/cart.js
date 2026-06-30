@@ -59,13 +59,19 @@ async function updateQuantity(productId, change) {
 
     if (!item) return;
 
-    item.quantity += change;
+    const newQuantity = item.quantity + change;
 
-    if (item.quantity <= 0) {
+    if (newQuantity <= 0) {
         removeFromCart(productId);
         return;
     }
 
+    if (change > 0 && newQuantity > item.stock) {
+        showNotification(`Only ${item.stock} of ${item.name} available`, 'error');
+        return;
+    }
+
+    item.quantity = newQuantity;
     localStorage.setItem('cart', JSON.stringify(cart));
 
     // Update DOM
@@ -73,7 +79,7 @@ async function updateQuantity(productId, change) {
     document.querySelector(`#cart-item-${productId} .price`).textContent =
         `$${(item.price * item.quantity).toFixed(2)}`;
 
-    // ✅ FIX: Sync updated quantity to backend
+    // Sync updated quantity to backend
     if (isLoggedIn()) {
         try {
             await fetchWithAuth(`${API_URL}/cart/${productId}`, {

@@ -81,13 +81,38 @@ func Checkout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tx, err := database.DB.Begin()
+	if err != nil {
+		http.Error(w, "Error starting transaction", http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback() // no-op if tx.Commit() succeeds
+
 	var totalAmount float64
+
+	// First pass: lock rows, verify stock, compute total
 	for _, item := range req.Items {
+		var stock int
+		var name string
+		err := tx.QueryRow(
+			"SELECT name, stock FROM products WHERE id = ? FOR UPDATE",
+			item.ProductID,
+		).Scan(&name, &stock)
+		if err != nil {
+			http.Error(w, "Product not found", http.StatusBadRequest)
+			return
+		}
+
+		if stock < item.Quantity {
+			http.Error(w, "Product '"+name+"' is out of stock or has insufficient quantity", http.StatusConflict)
+			return
+		}
+
 		totalAmount += item.Price * float64(item.Quantity)
 	}
 
-	// Create order (user_id may be NULL for guest checkout)
-	result, err := database.DB.Exec(
+	// Create order
+	result, err := tx.Exec(
 		`INSERT INTO orders 
 			(user_id, total_amount, first_name, last_name, email, phone, address, city, zip_code, country) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -101,17 +126,39 @@ func Checkout(w http.ResponseWriter, r *http.Request) {
 
 	orderID, _ := result.LastInsertId()
 
-	// Create order items
+	// Second pass: create order items + decrement stock
 	for _, item := range req.Items {
-		database.DB.Exec(
+		_, err = tx.Exec(
 			"INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
 			orderID, item.ProductID, item.Quantity, item.Price,
 		)
+		if err != nil {
+			http.Error(w, "Error creating order item", http.StatusInternalServerError)
+			return
+		}
+
+		_, err = tx.Exec(
+			"UPDATE products SET stock = stock - ? WHERE id = ?",
+			item.Quantity, item.ProductID,
+		)
+		if err != nil {
+			http.Error(w, "Error updating stock", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Clear cart in DB only if a logged-in user placed the order
 	if req.UserID != nil {
-		database.DB.Exec("DELETE FROM cart WHERE user_id = ?", *req.UserID)
+		_, err = tx.Exec("DELETE FROM cart WHERE user_id = ?", *req.UserID)
+		if err != nil {
+			http.Error(w, "Error clearing cart", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		http.Error(w, "Error finalizing order", http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

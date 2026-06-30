@@ -58,9 +58,19 @@ function updateCartCount() {
 
 // ─── ADD TO CART ──────────────────────────────────────────
 async function addToCart(product) {
-    // 1. Keep your existing localStorage logic for fallback UI rendering
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     const existingItem = cart.find(item => item.id === product.id);
+    const currentQtyInCart = existingItem ? existingItem.quantity : 0;
+
+    if (product.stock <= 0) {
+        showNotification(`${product.name} is out of stock`, 'error');
+        return;
+    }
+
+    if (currentQtyInCart + 1 > product.stock) {
+        showNotification(`Only ${product.stock} of ${product.name} available`, 'error');
+        return;
+    }
 
     if (existingItem) {
         existingItem.quantity += 1;
@@ -70,7 +80,6 @@ async function addToCart(product) {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
 
-    // 2. NEW: Send the item to your backend database if the user is logged in
     if (isLoggedIn()) {
         try {
             const user = getUser();
