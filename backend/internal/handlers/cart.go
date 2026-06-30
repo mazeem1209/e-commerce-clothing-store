@@ -6,8 +6,10 @@ import (
 	"strconv"
 
 	"clothing-store/backend/internal/database"
+	"clothing-store/backend/internal/middleware"
 	"clothing-store/backend/internal/models"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 )
 
@@ -92,5 +94,37 @@ func RemoveFromCart(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Item removed from cart",
+	})
+}
+
+func UpdateCartQuantity(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+
+	var body struct {
+		Quantity int `json:"quantity"`
+	}
+	json.NewDecoder(r.Body).Decode(&body)
+
+	claims, ok := r.Context().Value(middleware.UserKey).(jwt.MapClaims)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	userIDFloat, _ := claims["user_id"].(float64)
+	userID := int(userIDFloat)
+
+	_, err := database.DB.Exec(
+		"UPDATE cart SET quantity = ? WHERE id = ? AND user_id = ?",
+		body.Quantity, id, userID,
+	)
+	if err != nil {
+		http.Error(w, "Error updating quantity", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Quantity updated",
 	})
 }

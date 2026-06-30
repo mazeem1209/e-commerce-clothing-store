@@ -53,7 +53,7 @@ function createCartItem(item) {
 }
 
 // ─── UPDATE QUANTITY ──────────────────────────────────────
-function updateQuantity(productId, change) {
+async function updateQuantity(productId, change) {
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     const item = cart.find(i => i.id === productId);
 
@@ -67,9 +67,24 @@ function updateQuantity(productId, change) {
     }
 
     localStorage.setItem('cart', JSON.stringify(cart));
+
+    // Update DOM
     document.getElementById(`qty-${productId}`).textContent = item.quantity;
     document.querySelector(`#cart-item-${productId} .price`).textContent =
         `$${(item.price * item.quantity).toFixed(2)}`;
+
+    // ✅ FIX: Sync updated quantity to backend
+    if (isLoggedIn()) {
+        try {
+            await fetchWithAuth(`${API_URL}/cart/${productId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ quantity: item.quantity })
+            });
+        } catch (error) {
+            console.error('Failed to sync quantity to server:', error);
+        }
+    }
+
     calculateTotal();
     updateCartCount();
 }
@@ -96,7 +111,14 @@ function removeFromCart(productId) {
 // ─── CALCULATE TOTAL ──────────────────────────────────────
 function calculateTotal() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // ✅ FIX: Read quantity directly from the DOM to avoid stale localStorage reads
+    const subtotal = cart.reduce((sum, item) => {
+        const domQty = document.getElementById(`qty-${item.id}`);
+        const quantity = domQty ? parseInt(domQty.textContent) : item.quantity;
+        return sum + (item.price * quantity);
+    }, 0);
+
     updateSummary(subtotal);
 }
 

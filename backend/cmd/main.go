@@ -56,6 +56,7 @@ func main() {
 	protected.HandleFunc("/cart/{user_id}", handlers.GetCart).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/cart", handlers.AddToCart).Methods("POST", "OPTIONS")
 	protected.HandleFunc("/cart/{id}", handlers.RemoveFromCart).Methods("DELETE", "OPTIONS")
+	protected.HandleFunc("/cart/{id}", handlers.UpdateCartQuantity).Methods("PUT", "OPTIONS")
 	protected.HandleFunc("/orders/{user_id}", handlers.GetOrders).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/orders/{id}", handlers.GetOrder).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/orders/{id}/cancel", handlers.CancelOrder).Methods("PUT", "OPTIONS")
