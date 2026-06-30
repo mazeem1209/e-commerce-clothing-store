@@ -61,7 +61,7 @@ function loadRecentOrders(orders) {
         tbody.innerHTML += `
             <tr>
                 <td>#${order.id.toString().padStart(6, '0')}</td>
-                <td>User #${order.user_id}</td>
+                <td>${order.user_id !== null ? 'User #' + order.user_id : 'Guest'}</td>
                 <td>$${order.total_amount.toFixed(2)}</td>
                 <td><span class="order-status ${order.status}">${order.status}</span></td>
                 <td>${date}</td>
@@ -137,7 +137,7 @@ async function loadOrdersTable() {
             tbody.innerHTML += `
                 <tr>
                     <td>#${order.id.toString().padStart(6, '0')}</td>
-                    <td>User #${order.user_id}</td>
+                    <td>${order.user_id !== null ? 'User #' + order.user_id : 'Guest'}</td>
                     <td>$${order.total_amount.toFixed(2)}</td>
                     <td><span class="order-status ${order.status}">${order.status}</span></td>
                     <td>${date}</td>

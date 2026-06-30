@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -22,16 +23,26 @@ func GetAllOrders(w http.ResponseWriter, r *http.Request) {
 
 	var orders []map[string]interface{}
 	for rows.Next() {
-		var id, userID int
+		var id int
+		var userID sql.NullInt64
 		var totalAmount float64
 		var status string
 		var createdAt []byte
 
-		rows.Scan(&id, &userID, &totalAmount, &status, &createdAt)
+		if err := rows.Scan(&id, &userID, &totalAmount, &status, &createdAt); err != nil {
+			continue
+		}
+
+		var userIDValue interface{}
+		if userID.Valid {
+			userIDValue = userID.Int64
+		} else {
+			userIDValue = nil
+		}
 
 		orders = append(orders, map[string]interface{}{
 			"id":           id,
-			"user_id":      userID,
+			"user_id":      userIDValue,
 			"total_amount": totalAmount,
 			"status":       status,
 			"created_at":   string(createdAt),

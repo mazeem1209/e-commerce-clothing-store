@@ -48,6 +48,7 @@ func main() {
 	api.HandleFunc("/login", handlers.Login).Methods("POST", "OPTIONS")
 	api.HandleFunc("/products", handlers.GetProducts).Methods("GET", "OPTIONS")
 	api.HandleFunc("/products/{id}", handlers.GetProduct).Methods("GET", "OPTIONS")
+	api.HandleFunc("/checkout", handlers.Checkout).Methods("POST", "OPTIONS")
 
 	// ─── Protected Routes ─────────────────────────────────────
 	protected := api.PathPrefix("").Subrouter()
@@ -60,7 +61,6 @@ func main() {
 	protected.HandleFunc("/orders/{user_id}", handlers.GetOrders).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/orders/{id}", handlers.GetOrder).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/orders/{id}/cancel", handlers.CancelOrder).Methods("PUT", "OPTIONS")
-	protected.HandleFunc("/checkout", handlers.Checkout).Methods("POST", "OPTIONS")
 	protected.HandleFunc("/returns", handlers.RequestReturn).Methods("POST", "OPTIONS")
 	protected.HandleFunc("/returns/{user_id}", handlers.GetUserReturns).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/addresses/{user_id}", handlers.GetAddresses).Methods("GET", "OPTIONS")

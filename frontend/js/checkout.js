@@ -257,29 +257,23 @@ function validateForm() {
 }
 
 // ─── PLACE ORDER ──────────────────────────────────────────
-// ─── PLACE ORDER ──────────────────────────────────────────
 async function placeOrder() {
     if (!validateForm()) return;
-
-    if (!isLoggedIn()) {
-        showNotification('Please login to place an order!', 'error');
-        setTimeout(() => window.location.href = 'login.html', 1500);
-        return;
-    }
 
     const btn = document.getElementById('place-order-btn');
     btn.textContent = 'Processing...';
     btn.disabled = true;
 
     try {
-        const user = getUser();
-        
+        const loggedIn = isLoggedIn();
+        const user = loggedIn ? getUser() : null;
+
         // 1. Grab the actual items array from localStorage
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        
-        // 2. Map the frontend cart structure to what your backend model expects 
+
+        // 2. Map the frontend cart structure to what your backend model expects
         const items = cart.map(item => ({
-            product_id: item.id,       // <-- Change to 'id' if your backend expects item.id
+            product_id: item.id,
             quantity: item.quantity,
             price: item.price
         }));
@@ -298,25 +292,30 @@ async function placeOrder() {
 
         // 4. Combine everything into one single request payload
         const payload = {
-            user_id: user.id,
-            items: items, // <-- Sending your actual products now!
+            user_id: loggedIn ? user.id : null,
+            items: items,
             ...shippingData
         };
 
-        const response = await fetchWithAuth(`${API_URL}/checkout`, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
+        // 5. Use plain fetch for guests (no token), fetchWithAuth for logged-in users
+        const response = loggedIn
+            ? await fetchWithAuth(`${API_URL}/checkout`, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            : await fetch(`${API_URL}/checkout`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
         if (!response.ok) {
-            // Try to extract backend text error message if available
             const errText = await response.text();
             throw new Error(errText || 'Checkout failed');
         }
 
         const data = await response.json();
 
-        // Clear cart from local state since checkout succeeded
         localStorage.removeItem('cart');
         updateCartCount();
 
@@ -336,14 +335,14 @@ async function placeOrder() {
 
 // ─── INIT ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    if (!isLoggedIn()) {
-        showNotification('Please login to checkout!', 'error');
-        setTimeout(() => window.location.href = 'login.html', 1500);
-        return;
+    loadCheckoutItems();
+
+    if (isLoggedIn()) {
+        loadSavedAddresses();
+    } else {
+        document.getElementById('saved-addresses-section').style.display = 'none';
     }
 
-    loadCheckoutItems();
-    loadSavedAddresses();
     initPaymentMethods();
     initCardFormatting();
 

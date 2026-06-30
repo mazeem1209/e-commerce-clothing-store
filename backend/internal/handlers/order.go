@@ -71,44 +71,28 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 
 func Checkout(w http.ResponseWriter, r *http.Request) {
 	var req models.CheckoutRequest
-	json.NewDecoder(r.Body).Decode(&req)
-
-	// Get cart items
-	rows, err := database.DB.Query(`
-		SELECT c.product_id, c.quantity, p.price
-		FROM cart c
-		JOIN products p ON c.product_id = p.id
-		WHERE c.user_id = ?`, req.UserID)
-	if err != nil {
-		http.Error(w, "Error fetching cart", http.StatusInternalServerError)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	defer rows.Close()
 
-	var totalAmount float64
-	type cartRow struct {
-		ProductID int
-		Quantity  int
-		Price     float64
-	}
-	var cartRows []cartRow
-
-	for rows.Next() {
-		var cr cartRow
-		rows.Scan(&cr.ProductID, &cr.Quantity, &cr.Price)
-		totalAmount += cr.Price * float64(cr.Quantity)
-		cartRows = append(cartRows, cr)
-	}
-
-	if len(cartRows) == 0 {
+	if len(req.Items) == 0 {
 		http.Error(w, "Cart is empty", http.StatusBadRequest)
 		return
 	}
 
-	// Create order
+	var totalAmount float64
+	for _, item := range req.Items {
+		totalAmount += item.Price * float64(item.Quantity)
+	}
+
+	// Create order (user_id may be NULL for guest checkout)
 	result, err := database.DB.Exec(
-		"INSERT INTO orders (user_id, total_amount) VALUES (?, ?)",
-		req.UserID, totalAmount,
+		`INSERT INTO orders 
+			(user_id, total_amount, first_name, last_name, email, phone, address, city, zip_code, country) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		req.UserID, totalAmount, req.FirstName, req.LastName, req.Email,
+		req.Phone, req.Address, req.City, req.ZipCode, req.Country,
 	)
 	if err != nil {
 		http.Error(w, "Error creating order", http.StatusInternalServerError)
@@ -118,15 +102,17 @@ func Checkout(w http.ResponseWriter, r *http.Request) {
 	orderID, _ := result.LastInsertId()
 
 	// Create order items
-	for _, cr := range cartRows {
+	for _, item := range req.Items {
 		database.DB.Exec(
 			"INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
-			orderID, cr.ProductID, cr.Quantity, cr.Price,
+			orderID, item.ProductID, item.Quantity, item.Price,
 		)
 	}
 
-	// Clear cart
-	database.DB.Exec("DELETE FROM cart WHERE user_id = ?", req.UserID)
+	// Clear cart in DB only if a logged-in user placed the order
+	if req.UserID != nil {
+		database.DB.Exec("DELETE FROM cart WHERE user_id = ?", *req.UserID)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{

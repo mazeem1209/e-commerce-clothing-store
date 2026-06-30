@@ -145,13 +145,6 @@ function initCheckout() {
                 showNotification('Your cart is empty!', 'error');
                 return;
             }
-            if (!isLoggedIn()) {
-                showNotification('Please login to checkout!', 'error');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1500);
-                return;
-            }
             window.location.href = 'checkout.html';
         });
     }
