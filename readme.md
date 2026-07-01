@@ -45,3 +45,32 @@ A responsive, full-stack e-commerce web application designed for a modern clothi
 │
 ├── ⚙️ .gitignore                     # Git tracking exclusions (excludes backend/.env)
 └── 📝 README.md                      # Project documentation
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Go 1.21+ installed
+- MySQL running locally
+
+### 1. Clone & configure
+git clone https://github.com/mazeem0129/e-commerce-clothing-store
+cd e-commerce-clothing-store/backend
+
+Create a `.env` file in `backend/` with:
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=yourpassword
+DB_NAME=clothing_store
+JWT_SECRET=your_secret_key
+SERVER_PORT=8080
+
+### 2. Set up the database
+mysql -u root -p -e "CREATE DATABASE clothing_store"
+mysql -u root -p clothing_store < ../database/migrations/001_create_tables.sql
+
+### 3. Run the backend
+go mod tidy
+go run cmd/main.go
+
+Server runs at `http://localhost:8080`. The frontend is served automatically as static files by the Go server itself — no separate frontend setup needed.
