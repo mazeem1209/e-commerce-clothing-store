@@ -24,10 +24,10 @@ function updateNavbar() {
 
     if (authLink) {
         if (isLoggedIn() && user) {
-            authLink.href = 'http://127.0.0.1:5500/frontend/pages/profile.html';
+            authLink.href = '/pages/profile.html';
             authLink.innerHTML = `<i class="fas fa-user-circle"></i>`;
         } else {
-            authLink.href = 'http://127.0.0.1:5500/frontend/pages/login.html';
+            authLink.href = '/pages/login.html';
             authLink.innerHTML = `<i class="fas fa-user"></i>`;
         }
     }
@@ -38,7 +38,7 @@ function updateNavbar() {
         if (!document.getElementById('admin-nav-link')) {
             const adminLink = document.createElement('li');
             adminLink.innerHTML = `
-                <a href="http://127.0.0.1:5500/frontend/pages/admin.html" 
+                <a href="/pages/admin.html" 
                 id="admin-nav-link">
                 <i class="fas fa-cog"></i> Admin
                 </a>`;
@@ -134,9 +134,9 @@ function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
     card.innerHTML = `
-        <img src="${product.image_url || '/frontend/assets/images/placeholder.jpg'}" 
-             alt="${product.name}"
-             onerror="this.src='/frontend/assets/images/placeholder.jpg'">
+        <img src="${product.image_url || '/assets/images/placeholder.jpg'}" 
+            alt="${product.name}"
+            onerror="this.src='/assets/images/placeholder.jpg'">
         <div class="product-card-info">
             <h3>${product.name}</h3>
             <p class="category">${product.category}</p>
@@ -148,7 +148,7 @@ function createProductCard(product) {
                 Add to Cart
             </button>
             <button class="btn btn-secondary" style="background:var(--primary);color:white;"
-                onclick="location.href='/frontend/pages/product-detail.html?id=${product.id}'">
+                onclick="location.href='/pages/product-detail.html?id=${product.id}'">
                 View
             </button>
         </div>
@@ -177,7 +177,7 @@ function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('cart');
-    window.location.href = 'http://127.0.0.1:5500/frontend/pages/login.html';
+    window.location.href = '/pages/login.html';
 }
 
 // ─── HAMBURGER MENU ───────────────────────────────────────

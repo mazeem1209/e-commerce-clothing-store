@@ -82,6 +82,11 @@ func main() {
 	admin.HandleFunc("/returns", handlers.GetAllReturns).Methods("GET", "OPTIONS")
 	admin.HandleFunc("/returns/{id}", handlers.UpdateReturnStatus).Methods("PUT", "OPTIONS")
 
+	// ─── Serve Frontend (Static Files) ─────────────────────────
+	frontendDir := "../frontend"
+	fileServer := http.FileServer(http.Dir(frontendDir))
+	router.PathPrefix("/").Handler(fileServer)
+
 	port := cfg.ServerPort
 	if port != "" && port[0] != ':' {
 		port = ":" + port
