@@ -2,6 +2,7 @@
 let allProducts = [];
 let filteredProducts = [];
 let currentCategory = 'all';
+let currentMinPrice = 0;
 let currentMaxPrice = 500;
 let currentSort = 'default';
 
@@ -49,7 +50,7 @@ function applyFilters() {
 
     filteredProducts = allProducts.filter(product => {
         const categoryMatch = currentCategory === 'all' || product.category === currentCategory;
-        const priceMatch = product.price <= currentMaxPrice;
+        const priceMatch = product.price >= currentMinPrice && product.price <= currentMaxPrice;
         return categoryMatch && priceMatch;
     });
 
@@ -104,16 +105,57 @@ function initCategoryFilter() {
 
 // ─── PRICE FILTER ─────────────────────────────────────────
 function initPriceFilter() {
-    const priceRange = document.getElementById('price-range');
-    const priceValue = document.getElementById('price-value');
+    const minSlider = document.getElementById('price-range-min');
+    const maxSlider = document.getElementById('price-range-max');
+    const minLabel = document.getElementById('price-value-min');
+    const maxLabel = document.getElementById('price-value-max');
+    const sliderRange = document.getElementById('slider-range');
 
-    if (priceRange) {
-        priceRange.addEventListener('input', () => {
-            currentMaxPrice = parseInt(priceRange.value);
-            priceValue.textContent = `$${currentMaxPrice}`;
-            applyFilters();
-        });
+    if (!minSlider || !maxSlider) return;
+
+    const gap = 10; // minimum $ distance between the two handles
+
+    // Runs continuously while dragging — visuals only, no filtering
+    function updateVisuals(e) {
+        let minVal = parseInt(minSlider.value);
+        let maxVal = parseInt(maxSlider.value);
+
+        if (maxVal - minVal < gap) {
+            if (e && e.target === minSlider) {
+                minVal = maxVal - gap;
+                minSlider.value = minVal;
+            } else {
+                maxVal = minVal + gap;
+                maxSlider.value = maxVal;
+            }
+        }
+
+        minLabel.textContent = `$${minVal}`;
+        maxLabel.textContent = `$${maxVal}`;
+
+        const rangeMin = parseInt(minSlider.min);
+        const rangeMax = parseInt(minSlider.max);
+        const percentMin = ((minVal - rangeMin) / (rangeMax - rangeMin)) * 100;
+        const percentMax = ((maxVal - rangeMin) / (rangeMax - rangeMin)) * 100;
+
+        sliderRange.style.left = `${percentMin}%`;
+        sliderRange.style.width = `${percentMax - percentMin}%`;
     }
+
+    // Runs once, when the handle is released — this is when we actually filter
+    function commitFilter() {
+        currentMinPrice = parseInt(minSlider.value);
+        currentMaxPrice = parseInt(maxSlider.value);
+        applyFilters();
+    }
+
+    minSlider.addEventListener('input', updateVisuals);
+    maxSlider.addEventListener('input', updateVisuals);
+
+    minSlider.addEventListener('change', commitFilter);
+    maxSlider.addEventListener('change', commitFilter);
+
+    updateVisuals(); // set initial track fill on page load
 }
 
 // ─── SORT FILTER ──────────────────────────────────────────
@@ -133,13 +175,20 @@ function initClearFilters() {
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             currentCategory = 'all';
+            currentMinPrice = 0;
             currentMaxPrice = 500;
             currentSort = 'default';
 
             document.querySelectorAll('.filter-link').forEach(l => l.classList.remove('active'));
             document.querySelector('[data-category="all"]').classList.add('active');
-            document.getElementById('price-range').value = 500;
-            document.getElementById('price-value').textContent = '$500';
+
+            const minSlider = document.getElementById('price-range-min');
+            const maxSlider = document.getElementById('price-range-max');
+            minSlider.value = 0;
+            maxSlider.value = 500;
+            minSlider.dispatchEvent(new Event('input'));
+            minSlider.dispatchEvent(new Event('change'));
+
             document.getElementById('sort-select').value = 'default';
 
             applyFilters();
